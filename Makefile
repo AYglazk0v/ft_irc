@@ -11,8 +11,11 @@ HEADER		=	Chanel.hpp \
 				Ping.hpp \
 				Server.hpp \
 				User.hpp \
+				utils.hpp
 
-SRC			=	irc.cc
+SRC			=	irc.cc \
+				server.cc \
+				utils.cc
 
 OBJ			=	$(addprefix $(OBJ_DIR)/, $(SRC:.cc=.o))
 
