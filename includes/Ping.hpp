@@ -1,11 +1,17 @@
 #ifndef PING_HPP
 # define PING_HPP
 
-class Ping {
-	private:
-	public:
-		Ping();
-		~Ping();
+# include <ctime>
+
+struct Ping {
+		int				client_sc;
+		std::time_t		delay;
+		pthread_mutex_t	mutex;
+		bool			online;
+		bool			disconnect;
+		bool			res_wait;
+		bool			res_req;
+		bool			res_res;
 }; //Ping
 
 #endif

@@ -1,12 +1,14 @@
 #ifndef SERVER_HPP
 # define SERVER_HPP
 
-#include <iostream>
+# include <algorithm>
 # include <sys/select.h>
 # include <netinet/in.h>
 # include <arpa/inet.h>
+# include <fcntl.h>
 # include <vector>
 
+# include "utils.hpp"
 # include "Ping.hpp"
 # include "User.hpp"
 # include "Chanel.hpp"
@@ -31,9 +33,7 @@ class Server {
 		std::vector<Chanel *>	chanels;
 
 	public:
-		Server();
 		Server(char **argv);
-		~Server();
 
 }; //server
 
