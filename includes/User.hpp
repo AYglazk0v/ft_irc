@@ -2,7 +2,7 @@
 # define USER_HPP
 
 # include "Server.hpp"
-
+# include <regex>
 class User {
 	private:
 		int					id_;
@@ -30,6 +30,26 @@ class User {
 			away_ = 0;
 			oper_ = 0;
 			invis_ = 0;
+		}
+
+		void User::clearBuff(){
+			buff_ = "";
+			buff_.clear();
+		}
+
+		bool User::createBuff(int read_b, char *buff){
+			buff[read_b] = '\0';
+			if (buff_.empty()) {
+				buff_ = buff;
+			} else {
+				buff_ += buff;
+			}
+			if (buff[read_b - 1] != '\n') {
+				return false;
+			}
+			std::regex rx("\r\n");
+			buff_ = std::regex_replace(buff_, rx, "\n");
+			return true;
 		}
 
 		int getId()					{ return id_; }
