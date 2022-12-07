@@ -3,7 +3,7 @@ NAME		=	irc
 CC			=	c++ -std=c++17
 CFLAGS		=	-Wall -Werror -Wextra
 
-HEADER_DIR	=	./include
+HEADER_DIR	=	./includes
 SRC_DIR		=	./src
 OBJ_DIR		=	./obj
 
