@@ -20,7 +20,7 @@ class Server {
 	private:
 		int						port_;
 		int						socket_;
-		int						user_connectin_;
+		int						user_connection_;
 		std::string				password_;
 		fd_set					read_;
 		fd_set					write_;
@@ -32,8 +32,12 @@ class Server {
 		std::vector<User *> 	history_;
 		std::vector<Chanel *>	chanels;
 
+	private:
+		void new_user_connect();
+
 	public:
 		Server(char **argv);
+		void	loop();
 
 }; //server
 

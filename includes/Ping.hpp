@@ -4,7 +4,7 @@
 # include <ctime>
 
 struct Ping {
-		int				client_sc;
+		int				client_sock_fd;
 		std::time_t		delay;
 		pthread_mutex_t	mutex;
 		bool			online;

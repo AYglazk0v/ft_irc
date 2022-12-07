@@ -1,9 +1,5 @@
 #include "../includes/Server.hpp"
 
-namespace {
-
-}
-
 Server::Server(char** argv) {
 	if (!std::all_of(argv[1], argv[1] + std::strlen(argv[1]), [](unsigned char c){return std::isdigit(c);})) {
 		error("Error: port incorrect. Use only digit");
@@ -15,7 +11,7 @@ Server::Server(char** argv) {
 	}
 	
 	password_.assign(argv[2], std::strlen(argv[2]));
-	user_connectin_ = 0;
+	user_connection_ = 0;
 	FD_ZERO(&read_);
 	FD_ZERO(&write_);
 	FD_ZERO(&accept_);
@@ -51,4 +47,56 @@ Server::Server(char** argv) {
 	}
 	fcntl(socket_, O_NONBLOCK);
 	std::cout << "IRC SERVER STARTED. \nPORT" << port_ << "\tPassword: " + password_ + "\nWaiting for connection ..." << std::endl;
+}
+
+void Server::new_user_connect() {
+	int new_socket;
+	int size_addr =  sizeof(addr_);
+
+	if ((new_socket = accept(socket_, (struct sockaddr*)&addr_, (socklen_t*)&size_addr)) < 0 ) {
+		throw std::runtime_error("Error create new user socket");
+	}
+	fcntl(new_socket, F_SETFL, O_NONBLOCK);
+	FD_SET(new_socket, &read_);
+	req_res[user_connection_].client_sock_fd = new_socket;
+	req_res[user_connection_].disconnect = 0;
+	users_.push_back(new User(user_connection_, new_socket, addr_));
+	user_connection_++;
+
+	std::cout << "\nNew connection id[" << user_connection_ - 1 << "], open socket: " << new_socket << std::endl;
+	std::cout << "Ip adress: " << inet_ntoa(addr_.sin_addr) << std::endl;
+	std::cout << "Port: " << ntohs(addr_.sin_port) << std::endl;
+}
+
+void Server::loop(){
+	int			max_sock_fd;
+	int			activity;
+	pthread_t	checking_ping;
+
+	while (true) {
+		FD_ZERO(&read_);
+		FD_SET(socket_, &read_);
+		max_sock_fd = socket_;
+		
+		for(auto&& usr : users_) {
+			if (usr->getSockFd() > 0) {
+				FD_SET(usr->getSockFd(), &read_);
+			}
+			if (usr->getSockFd() > max_sock_fd) {
+				max_sock_fd = usr->getSockFd();
+			}
+		}
+
+		activity = select(max_sock_fd + 1, &read_, NULL, NULL, NULL);
+		if ((activity < 0) && (errno != EINTR)) {
+			std::cerr<< "timeout select" << std::endl;
+		}
+		if (FD_ISSET(socket_, &read_)) {
+			try {
+				new_user_connect();
+			} catch (const std::exception& e) {
+				std::cerr << e.what() << std::endl;
+			}
+		}
+	}
 }

@@ -6,4 +6,5 @@ int main(int argc, char** argv) {
 		error("Error: invalid arguments. You must specify the port and password. \n[example: ./irc 6654 password]");
 	}
 	Server srv(argv);
+	srv.loop();
 }
