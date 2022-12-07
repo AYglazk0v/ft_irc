@@ -34,6 +34,7 @@ class Server {
 
 	private:
 		void new_user_connect();
+		void start_read();
 
 	public:
 		Server(char **argv);

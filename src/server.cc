@@ -97,6 +97,44 @@ void Server::loop(){
 			} catch (const std::exception& e) {
 				std::cerr << e.what() << std::endl;
 			}
+		} else {
+			start_read();
+		}
+	}
+}
+
+void Server::start_read() {
+	int read_b;
+	int size_addr;
+	char buff[1025];
+
+	size_addr = sizeof(addr_);
+	for (auto&& usr : users_) {
+		int sock_fd = usr->getSockFd();
+		if (req_res[usr->getId()].disconnect == 1) {
+			std::cout << "DISCONNECT!" << std::endl;
+			// disconnect(usr);
+			return;
+		}
+		if (FD_ISSET(sock_fd, &read_)) {
+			if ((read_b = read(sock_fd, &buff, 1024)) < 0) {
+				std::cerr << "Error: reading from socket [" << sock_fd << "]" << std::endl;
+				return;
+			} else if (read_b == 0) {
+				// disconnect(usr);
+				return;
+			} else {
+				if (!(usr->createBuff(read_b, buff))) {
+					return;
+				}
+				std::cout << "New Buff :" << usr->getBuff() << std::endl;
+				if (usr->getAutorization() && !req_res[usr->getId()].res_wait) {
+					req_res[usr->getId()].res_req = 1;
+				}
+				// if (parseMessage(usr)) {
+					// return;
+				// }
+			}
 		}
 	}
 }

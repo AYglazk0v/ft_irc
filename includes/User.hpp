@@ -65,6 +65,7 @@ class User {
 		std::string getHost()		{ return host_; }
 		std::string getServerName()	{ return serverName_; }
 		std::string	getRealName()	{ return realName_; }
+		std::string getBuff()		{ return buff_; }
 		std::string	getAwayMsg()	{ return away_msg_; }
 
 		void setId(int id) 							{ id_ = id; }
