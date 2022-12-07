@@ -6,9 +6,6 @@
 # include <algorithm>
 # include <cctype>
 
-void error(const std::string& msg) {
-		std::cerr << msg << std::endl;
-		exit(EXIT_FAILURE);
-}
+void error(const std::string& msg);
 
 #endif
