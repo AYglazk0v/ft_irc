@@ -1,7 +1,8 @@
 #ifndef USER_HPP
 # define USER_HPP
 
-# include "Server.hpp"
+// # include "Server.hpp"
+# include "utils.hpp"
 # include <regex>
 class User {
 	private:
@@ -32,12 +33,12 @@ class User {
 			invis_ = 0;
 		}
 
-		void User::clearBuff(){
+		void clearBuff(){
 			buff_ = "";
 			buff_.clear();
 		}
 
-		bool User::createBuff(int read_b, char *buff){
+		bool createBuff(int read_b, char *buff){
 			buff[read_b] = '\0';
 			if (buff_.empty()) {
 				buff_ = buff;
