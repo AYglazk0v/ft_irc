@@ -2,7 +2,9 @@
 # define CHANEL_HPP
 
 #include "User.hpp"
+#include <algorithm>
 #include <memory>
+#include <sys/types.h>
 
 class User;
 
@@ -27,7 +29,8 @@ class Chanel {
 		std::string getPassword()	{ return password_; }
 		std::string getTopic()		{ return topic_;}
 
-		bool isMember(User *usr);
+		bool isMember(User *usr) const { return (members_.end() != std::find_if(members_.begin(), members_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
+
 }; //Chanel
 
 #endif

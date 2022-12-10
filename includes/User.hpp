@@ -53,21 +53,21 @@ class User {
 			return true;
 		}
 
-		int getId()					{ return id_; }
-		int getSockFd()				{ return sock_fd_; }
-		sockaddr_in getAddr()		{ return addres_;}
-		bool getAccess()			{ return access_; }
-		bool getAutorization()		{ return autorization_; }
-		bool getAway()				{ return away_; }
-		bool getOper()				{ return oper_; }
-		bool getInvis()				{ return invis_; }
-		std::string getNick()		{ return nick_; }
-		std::string getUser()		{ return user_; }
-		std::string getHost()		{ return host_; }
-		std::string getServerName()	{ return serverName_; }
-		std::string	getRealName()	{ return realName_; }
-		std::string getBuff()		{ return buff_; }
-		std::string	getAwayMsg()	{ return away_msg_; }
+		int getId() const					{ return id_; }
+		int getSockFd()	const				{ return sock_fd_; }
+		sockaddr_in getAddr() const			{ return addres_;}
+		bool getAccess() const				{ return access_; }
+		bool getAutorization() const		{ return autorization_; }
+		bool getAway() const				{ return away_; }
+		bool getOper() const				{ return oper_; }
+		bool getInvis()	const				{ return invis_; }
+		std::string getNick() const			{ return nick_; }
+		std::string getUser() const			{ return user_; }
+		std::string getHost() const			{ return host_; }
+		std::string getServerName() const	{ return serverName_; }
+		std::string	getRealName() const 	{ return realName_; }
+		std::string getBuff() const			{ return buff_; }
+		std::string	getAwayMsg() const		{ return away_msg_; }
 
 		void setId(int id) 							{ id_ = id; }
 		void setSockFd(int sock_fd)					{ sock_fd_ = sock_fd;}
