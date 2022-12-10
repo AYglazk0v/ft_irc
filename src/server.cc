@@ -1,5 +1,7 @@
 #include "../includes/Server.hpp"
-#include <vector>
+#include <arpa/inet.h>
+#include <iostream>
+#include <netinet/in.h>
 
 Server::Server(char** argv) {
 	if (!std::all_of(argv[1], argv[1] + std::strlen(argv[1]), [](unsigned char c){return std::isdigit(c);})) {
@@ -122,7 +124,7 @@ void Server::start_read() {
 				std::cerr << "Error: reading from socket [" << sock_fd << "]" << std::endl;
 				return;
 			} else if (read_b == 0) {
-				// disconnect(usr);
+				disconnect(usr);
 				return;
 			} else {
 				if (!(usr->createBuff(read_b, buff))) {
@@ -144,8 +146,41 @@ void Server::disconnect(User* usr) {
 	history_.push_back(usr);
 	for (std::vector<Chanel *>::iterator it = chanels.begin(), ite = chanels.end(); it != ite; ++it) {
 		if ((*it)->isMember(usr)) {
-			
+			if ((*it)->isOperators(usr) && (*it)->memberSize() > 1 && (*it)->operSize() == 1) {
+				(*it)->addOper(usr, NULL);
+			} else if ((*it)->memberSize() == 1) {
+				chanels.erase(it);
+				break;
+			}
+			// (*it)->removeOperator(usr);
+			// (*it)->removeMember(usr);
+			(*it)->sendAll(usr, "QIUT", "Client exit", "");
+			break;
 		}
 	}
+	std::cout << "\nUser disconnected, ip: " << inet_ntoa(usr->getAddr().sin_addr) << " port: " << ntohs(usr->getAddr().sin_port) << std::endl;
+	req_res[usr->getId()].online = 0;
+	close(usr->getSockFd());
+	users_.erase(std::remove(users_.begin(), users_.end(), usr));
+}
 
+void Server::compileMsg(User &sendler, User &recipient, std::string arg1, std::string arg2, std::string arg3) {
+	std::string msg = ":" + sendler.getNick() + "!" + sendler.getUsername() + "@" + std::string(inet_ntoa(sendler.getAddr().sin_addr)) + " ";
+	if (arg2.empty()) {
+		msg += arg1 + "\r\n";
+	} else if (arg3.empty()) {
+		msg += arg1 + " :" + arg2 + "\r\n";
+	} else {
+		msg += arg1 + " " + arg2 + " :" + arg3 + "\r\n";
+	}
+	std::cout << "SEND MSG SOCKET_FD:" << recipient.getSockFd() << "\n" << msg << std::endl;
+	sendMsg(recipient.getSockFd(), msg);
+}
+
+bool Server::sendMsg(int sock_fd, const std::string& msg) {
+	if ((send(sock_fd, msg.c_str(), msg.length(), 0)) >= 0) {
+		return true;
+	}
+	std::cerr << "Error occurred while writing to socket" << std::endl;
+	return false;
 }

@@ -5,10 +5,12 @@
 # include "Ping.hpp"
 # include "User.hpp"
 # include "Chanel.hpp"
-#include <vector>
 
 #define	MAX_CLIENT	1000
 #define	MAX_CHANEL	1000
+
+class User;
+class Chanel;
 
 class Server {
 	private:
@@ -34,6 +36,9 @@ class Server {
 	public:
 		Server(char **argv);
 		void	loop();
+		
+		static void	compileMsg(User& sendler, User& recipient, std::string arg1, std::string arg2, std::string arg3);
+		static bool	sendMsg(int socket_fd, const std::string& msg);
 
 }; //server
 

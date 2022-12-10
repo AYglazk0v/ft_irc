@@ -55,14 +55,14 @@ class User {
 
 		int getId() const					{ return id_; }
 		int getSockFd()	const				{ return sock_fd_; }
-		sockaddr_in getAddr() const			{ return addres_;}
+		sockaddr_in getAddr()				{ return addres_;}
 		bool getAccess() const				{ return access_; }
 		bool getAutorization() const		{ return autorization_; }
 		bool getAway() const				{ return away_; }
 		bool getOper() const				{ return oper_; }
 		bool getInvis()	const				{ return invis_; }
 		std::string getNick() const			{ return nick_; }
-		std::string getUser() const			{ return user_; }
+		std::string getUsername() const			{ return user_; }
 		std::string getHost() const			{ return host_; }
 		std::string getServerName() const	{ return serverName_; }
 		std::string	getRealName() const 	{ return realName_; }
