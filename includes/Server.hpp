@@ -5,6 +5,7 @@
 # include "Ping.hpp"
 # include "User.hpp"
 # include "Chanel.hpp"
+#include <vector>
 
 #define	MAX_CLIENT	1000
 #define	MAX_CHANEL	1000
@@ -28,6 +29,7 @@ class Server {
 	private:
 		void new_user_connect();
 		void start_read();
+		void disconnect(User*);
 
 	public:
 		Server(char **argv);

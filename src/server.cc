@@ -1,4 +1,5 @@
 #include "../includes/Server.hpp"
+#include <vector>
 
 Server::Server(char** argv) {
 	if (!std::all_of(argv[1], argv[1] + std::strlen(argv[1]), [](unsigned char c){return std::isdigit(c);})) {
@@ -113,7 +114,7 @@ void Server::start_read() {
 		int sock_fd = usr->getSockFd();
 		if (req_res[usr->getId()].disconnect == 1) {
 			std::cout << "DISCONNECT!" << std::endl;
-			// disconnect(usr);
+			disconnect(usr);
 			return;
 		}
 		if (FD_ISSET(sock_fd, &read_)) {
@@ -137,4 +138,14 @@ void Server::start_read() {
 			}
 		}
 	}
+}
+
+void Server::disconnect(User* usr) {
+	history_.push_back(usr);
+	for (std::vector<Chanel *>::iterator it = chanels.begin(), ite = chanels.end(); it != ite; ++it) {
+		if ((*it)->isMember(usr)) {
+			
+		}
+	}
+
 }

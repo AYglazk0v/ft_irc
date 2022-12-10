@@ -1,6 +1,7 @@
 #ifndef PING_HPP
 # define PING_HPP
 
+# include "utils.hpp"
 # include <ctime>
 
 struct Ping {
