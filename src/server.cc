@@ -152,8 +152,8 @@ void Server::disconnect(User* usr) {
 				chanels.erase(it);
 				break;
 			}
-			// (*it)->removeOperator(usr);
-			// (*it)->removeMember(usr);
+			(*it)->removeOperator(usr);
+			(*it)->removeMember(usr);
 			(*it)->sendAll(usr, "QIUT", "Client exit", "");
 			break;
 		}
@@ -161,6 +161,7 @@ void Server::disconnect(User* usr) {
 	std::cout << "\nUser disconnected, ip: " << inet_ntoa(usr->getAddr().sin_addr) << " port: " << ntohs(usr->getAddr().sin_port) << std::endl;
 	req_res[usr->getId()].online = 0;
 	close(usr->getSockFd());
+	// users_.erase(std::remove_if(users_.begin(), users_.end(), [&usr](User& tmp) {return tmp.getId() == usr->getId();})); ЕСЛИ БЫ МЫ НЕ ЗНАЛИ, ЧТО ИДЕМ по USERS_
 	users_.erase(std::remove(users_.begin(), users_.end(), usr));
 }
 

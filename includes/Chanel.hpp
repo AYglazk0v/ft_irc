@@ -33,11 +33,14 @@ class Chanel {
 		size_t memberSize() const		{ return members_.size(); }
 		size_t operSize() const			{ return operators_.size(); }
 
-		bool isMember(User *usr) const { return (members_.end() != std::find_if(members_.begin(), members_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
-		bool isOperators(User *usr) const { return (operators_.end() != std::find_if(operators_.begin(), operators_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
-		bool isInvited(User *usr) const { return (invited_.end() != std::find_if(invited_.begin(), invited_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
-		bool isInvisble(User *usr) const { return (invisibles_.end() != std::find_if(invisibles_.begin(), invisibles_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
-		bool isBanned(User *usr) const { return (banned_.end() != std::find_if(banned_.begin(), members_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
+		bool isMember(User *usr) const		{ return (members_.end() != std::find_if(members_.begin(), members_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
+		bool isOperators(User *usr) const	{ return (operators_.end() != std::find_if(operators_.begin(), operators_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
+		bool isInvited(User *usr) const		{ return (invited_.end() != std::find_if(invited_.begin(), invited_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
+		bool isInvisble(User *usr) const	{ return (invisibles_.end() != std::find_if(invisibles_.begin(), invisibles_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
+		bool isBanned(User *usr) const		{ return (banned_.end() != std::find_if(banned_.begin(), members_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
+
+		void removeMember(User *usr)		{ members_.erase(std::remove_if(members_.begin(), members_.end(), [&usr](User& curr){return usr->getId() == curr.getId(); }));}
+		void removeOperator(User *usr)		{ operators_.erase(std::remove_if(operators_.begin(), operators_.end(), [&usr](User *curr){ return curr->getId() == usr->getId(); }));}
 
 }; //Chanel
 
