@@ -1,5 +1,6 @@
 #include "../includes/utils.hpp"
 #include "..//includes/User.hpp"
+#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -154,6 +155,101 @@ std::string CompileError(int index, User &usr, std::string arg1, std::string arg
 std::string compileReply(int index, User &usr, std::vector<std::string>&& args) {
 	std::string msg = ":IRC_SERVER " + std::to_string(index) + " " + usr.getNick() + " ";
 	switch (index) {
+		case 200:
+			msg += "Link " + args[0] + " " + args[1] + " " + args[2];
+			break;
+		case 201:
+			msg += "Try. " + args[0] + " " + args[1];
+			break;
+		case 202:
+			msg += "H.S. " + args[0] + " " + args[1];
+			break;
+		case 203:
+			msg += "????" + args[0] + " " + args[1];
+			break;
+		case 204:
+			msg += "Oper " + args[0] + " " + args[1];
+			break;
+		case 205:
+			msg += "User " + args[0] + " " + args[1];
+			break;
+		case 206:
+			msg += "Serv " + args[0] + " " + args[1] + "S " + args[2] + "C " + args[3] + " " + args[4] + "@" + args[5];
+			break;
+		case 208:
+			msg += args[0] + " O " + args[1];
+			break;
+
+		case 211:
+			msg += args[0] + " " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + " " + args[5] + " " + args[6];
+			break;
+		case 212:
+			msg += args[0] + " "+ args[1];
+			break;
+		case 213:
+			msg += "C " + args[0] + " * " + args[1] + " " + args[2] + " " + args[3];
+			break;
+		case 214:
+			msg += "N " + args[0] + " * " + args[1] + " " + args[2] + " " + args[3];
+			break;
+		case 215:
+			msg += "I " + args[0] + " * " + args[1] + " " + args[2] + " " + args[3];
+			break;
+		case 216:
+			msg += "K " + args[0] + " * " + args[1] + " " + args[2] + " " + args[3];
+			break;
+		case 218:
+			msg += "Y " + args[0] + " * " + args[1] + " " + args[2] + " " + args[3];
+			break;
+		case 219:
+			msg += args[0] + " :End of /STATS report";
+			break;
+		case 221:
+			msg += args[0];
+			break;
+		case 241:
+			msg += "L " + args[0] + " * " + args[1] + " " + args[2];
+			break;
+		case 242:
+			msg += ":Server Up %d days %d:%02d:%02d";
+			break;
+		case 243:
+			msg += "O " + args[0] + " * " + args[1];
+			break;
+		case 244:
+			msg += "H " + args[0] + " * " + args[1];
+			break;
+
+		case 251:
+			msg += ":There are " + args[0] + " users and " + args[1] + " invisible on " + args[2] + " servers";
+			break;
+		case 252:
+			msg += args[0] + " :operator(s) online";
+			break;
+		case 253:
+			msg += args[0] + " unknown connection(s)";
+			break;
+		case 254:
+			msg += args[0] + " :channels formed";
+			break;
+		case 255:
+			msg += "I have " + args[0] + " clients and " + args[1] + " servers";
+			break;
+		case 256:
+			msg += args[0] + " :Administrative info";
+			break;
+		case 257:
+			msg += ":Name " + args[0];
+			break;
+		case 258:
+			msg += ":Nickname " + args[0];
+			break;
+		case 259:
+			msg += ":E-Mail " + args[0];
+			break;
+		case 261:
+			msg += "File " + args[0] + " " + args[1];
+			break;
 		case 301:
 			msg += args[0] + " :" + args[1];
 			break;
@@ -178,6 +274,12 @@ std::string compileReply(int index, User &usr, std::vector<std::string>&& args) 
 		case 313:
 			msg += args[0] + " :is an IRC operator";
 			break;
+		case 314:
+			msg += args[0] + " " + args[1] + " " + args[2] + " * :" + args[3];
+			break;
+		case 315:
+			msg += args[0] + " :End of /WHO list";
+			break;
 		case 317:
 			msg += args[0] + " " + args[1] + " " + args[2] + " :seconds idle";
 			break;
@@ -187,12 +289,8 @@ std::string compileReply(int index, User &usr, std::vector<std::string>&& args) 
 		case 319:
 			msg += args[0] + " :" + args[1];
 			break;
-		case 314:
-			msg += args[0] + " " + args[1] + " " + args[2] + " * :" + args[3];
-			break;
-		case 369:
-			msg += args[0] + " :End of WHOWAS";
-			break;
+
+
 		case 321:
 			msg += "Channel :Users Name";
 			break;
@@ -223,23 +321,71 @@ std::string compileReply(int index, User &usr, std::vector<std::string>&& args) 
 		case 352:
 			msg += args[0] + " " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + " " + args[5] + " :" + args[6] + args[7];
 			break;
-		case 315:
-			msg += args[0] + " :End of /WHO list";
-			break;
+
 		case 353:
 			msg += args[0] + " :" + args[1];
 			break;
-		case 366:
-			msg += args[0] + " :End of /NAMES list";
-			break;
+
 		case 364:
 			msg += args[0] + " " + args[1] + ": " + args[2] + " " + args[3];
 			break;
 		case 365:
 			msg += args[0] + " :End of /LINKS list";
 			break;
+		case 366:
+			msg += args[0] + " :End of /NAMES list";
+			break;
+		case 367:
+			msg += args[0] + " " + args[1];
+			break;
+		case 368:
+			msg += args[0] + " :End of channel ban list";
+			break;
+		case 369:
+			msg += args[0] + " :End of WHOWAS";
+			break;
+		case 371:
+			msg += ":" + args[0];
+			break;
+		case 372:
+			msg += ":- " + args[0];
+			break;
+		case 374:
+			msg += ":End of /INFO list";
+			break;
+		case 375:
+			msg += ":- " + args[0] + " Message of the day - ";
+			break;
 
-		
+		case 376:
+			msg += ":End of /MOTD command";
+			break;
+		case 381:
+			msg += ":You are now an IRC operator";
+			break;
+		case 382:
+			msg += args[0] + " :Rehashing";
+			break;
+		case 391:
+			msg += args[0] + " :" + args[1];
+			break;
+		case 392:
+			msg += ":UserID Terminal Host";
+			break;
+		case 393:
+			msg += ":%-8s %-9s %-8s";
+			break;
+		case 394:
+			msg += "End of users";
+			break;
+		case 395:
+			msg += "Nobody logged is";
+			break;
+
+		default:
+			msg += "UNKNOWN REPLY";
+			break;
 	}
-	return msg + "\n";
+	msg += "\n";
+	return msg;
 }
