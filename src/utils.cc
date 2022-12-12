@@ -1,6 +1,7 @@
 #include "../includes/utils.hpp"
 #include "..//includes/User.hpp"
 #include <string>
+#include <vector>
 
 void error(const std::string& msg) {
 		std::cerr << msg << std::endl;
@@ -148,4 +149,97 @@ std::string CompileError(int index, User &usr, std::string arg1, std::string arg
 			break;
 	}
 	return  msg;
+}
+
+std::string compileReply(int index, User &usr, std::vector<std::string>&& args) {
+	std::string msg = ":IRC_SERVER " + std::to_string(index) + " " + usr.getNick() + " ";
+	switch (index) {
+		case 301:
+			msg += args[0] + " :" + args[1];
+			break;
+		case 302:
+			msg += ":" + args[0];	
+			break;
+		case 303:
+			msg += ":" + args[0];
+			break;
+		case 305:
+			msg += "You are no loger marked as being away";
+			break;
+		case 306:
+			msg += "You have been marked as being away";
+			break;
+		case 311:
+			msg += args[0] + " " + args[1] + " " + args[2] + " * :" + args[3];
+			break;
+		case 312:
+			msg += args[0] + " " + args[1] + " :" + args[2];
+			break;
+		case 313:
+			msg += args[0] + " :is an IRC operator";
+			break;
+		case 317:
+			msg += args[0] + " " + args[1] + " " + args[2] + " :seconds idle";
+			break;
+		case 318:
+			msg += args[0] + " :End of /WHOIS list";		
+			break;
+		case 319:
+			msg += args[0] + " :" + args[1];
+			break;
+		case 314:
+			msg += args[0] + " " + args[1] + " " + args[2] + " * :" + args[3];
+			break;
+		case 369:
+			msg += args[0] + " :End of WHOWAS";
+			break;
+		case 321:
+			msg += "Channel :Users Name";
+			break;
+		case 322:
+			msg += args[0] + " " + args[1] + " :" + args[2];
+			break;
+		case 323:
+			msg += "END of /LIST";
+			break;
+		case 324:
+			msg += args[0] + " +" + args[1];
+			break;
+		case 331:
+			msg += args[0] + " :No topic is set";
+			break;
+		case 332:
+			msg += args[0] + " :" + args[1];
+			break;
+		case 341:
+			msg += args[0] + " " + args[1];
+			break;
+		case 342:
+			msg += args[0] + " :Summoning user to IRC";
+			break;
+		case 351:
+			msg += args[0] + "." + args[1] + " " + args[2] + " :" + args[3];
+			break;
+		case 352:
+			msg += args[0] + " " + args[1] + " " + args[2] + " " + args[3] + " " + args[4] + " " + args[5] + " :" + args[6] + args[7];
+			break;
+		case 315:
+			msg += args[0] + " :End of /WHO list";
+			break;
+		case 353:
+			msg += args[0] + " :" + args[1];
+			break;
+		case 366:
+			msg += args[0] + " :End of /NAMES list";
+			break;
+		case 364:
+			msg += args[0] + " " + args[1] + ": " + args[2] + " " + args[3];
+			break;
+		case 365:
+			msg += args[0] + " :End of /LINKS list";
+			break;
+
+		
+	}
+	return msg + "\n";
 }

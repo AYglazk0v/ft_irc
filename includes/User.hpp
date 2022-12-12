@@ -4,6 +4,8 @@
 // # include "Server.hpp"
 # include "utils.hpp"
 # include <regex>
+#include <string>
+#include <vector>
 class User {
 	private:
 		int					id_;
@@ -87,6 +89,6 @@ class User {
 
 };//User
 
-std::string CompileError(int index, User& usr, std::string arg1, std::string arg2);
-
+std::string compileError(int index, User& usr, std::string arg1, std::string arg2);
+std::string compileReply(int index, User& usr, std::vector<std::string>&& args);
 #endif
