@@ -87,4 +87,6 @@ class User {
 
 };//User
 
+std::string CompileError(int index, User& usr, std::string arg1, std::string arg2);
+
 #endif

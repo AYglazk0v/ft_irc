@@ -1,6 +1,7 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
+// #include "User.hpp"
 # include <iostream>
 # include <cstring>
 # include <algorithm>
@@ -12,6 +13,6 @@
 # include <fcntl.h>
 # include <vector>
 
-void error(const std::string& msg);
+void        error(const std::string& msg);
 
 #endif
