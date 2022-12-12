@@ -1,7 +1,5 @@
 #include "../includes/Server.hpp"
-#include <arpa/inet.h>
-#include <iostream>
-#include <netinet/in.h>
+#include "../includes/Commands.hpp"
 
 Server::Server(char** argv) {
 	if (!std::all_of(argv[1], argv[1] + std::strlen(argv[1]), [](unsigned char c){return std::isdigit(c);})) {
@@ -134,12 +132,29 @@ void Server::start_read() {
 				if (usr->getAutorization() && !req_res[usr->getId()].res_wait) {
 					req_res[usr->getId()].res_req = 1;
 				}
-				// if (parseMessage(usr)) {
-					// return;
-				// }
+				if (parseMessage(usr)) {
+					return;
+				}
 			}
 		}
 	}
+}
+
+int Server::parseMessage(User*& usr) {
+	std::vector<std::string> msg_n = split(usr->getBuff(), '\n');
+	for (auto&& curr_msg : msg_n) {
+		auto args = splitMessage(curr_msg);
+		std::string msg;
+		if (args[0] == "QUIT") {
+			disconnect(usr);
+			return 1;
+		} else if (args[0] == "PASS" && Commands::cmd_pass(args, usr, this)) {
+			return 1;
+		}
+		//TODO
+
+	}
+	return 0;
 }
 
 void Server::disconnect(User* usr) {

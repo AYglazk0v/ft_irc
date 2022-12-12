@@ -1,12 +1,51 @@
 #include "../includes/utils.hpp"
 #include "..//includes/User.hpp"
-#include <cstdlib>
-#include <string>
-#include <vector>
 
 void error(const std::string& msg) {
 		std::cerr << msg << std::endl;
 		exit(EXIT_FAILURE);
+}
+
+std::vector<std::string> split(std::string msg, char sym) {
+	std::vector<std::string> ret;
+	auto i = msg.begin();
+	auto j = msg.begin();
+	while (i != msg.end()) {
+		i = std::find_if(i, msg.end(), [sym](char c){ return sym != c; });
+		j = std::find_if(i, msg.end(), [sym](char c){ return sym == c; });
+		if (i != msg.end()) {
+			ret.push_back(std::string(i, j));
+			i = j;
+		}
+	}
+	return ret;
+}
+
+std::vector<std::string> splitMessage(std::string msg) {
+	std::vector<std::string> ret;
+	auto new_end = std::unique(msg.begin(), msg.end(), [](const char& c1, const char& c2){ return c1 == c2; });
+	msg.erase(new_end, msg.end());
+	if (msg.size() && msg[0] == ' ') {
+		msg.erase(msg.begin());
+	}
+	if (msg.size() - 1 > 0 && msg[msg.size() - 1] == ' ') {
+		msg.erase(msg.end() - 1);
+	}
+	auto i = msg.find(' ');
+	auto j = msg.find(':');
+	while (i != std::string::npos && i < j) {
+		ret.push_back(msg.substr(0, i));
+		msg.erase(0, i + 1);
+		i = msg.find(' ');
+		j = msg.find(':');
+	}
+	ret.push_back(msg);
+	for (auto&& curr_ret : ret) {
+		if (curr_ret.front() == ':') {
+			curr_ret.erase(0, 1);
+		}
+	}
+	return ret;
 }
 
 std::string CompileError(int index, User &usr, std::string arg1, std::string arg2) {

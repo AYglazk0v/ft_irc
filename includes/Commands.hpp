@@ -7,7 +7,7 @@
 
 class Commands {
 	public:
-		static int	cmd_pass(std::vector<std::string> args, User& user, Server* data);
+		static int	cmd_pass(std::vector<std::string> args, User*& user, Server* data);
 		static int	cmd_user(std::vector<std::string> args, User& user);
 		static int	cmd_ping(std::vector<std::string> args, User& user);
 		static int	cmd_pong(std::vector<std::string> args, User& user);

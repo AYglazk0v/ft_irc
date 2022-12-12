@@ -5,6 +5,7 @@
 # include "Ping.hpp"
 # include "User.hpp"
 # include "Chanel.hpp"
+#include <string>
 
 #define	MAX_CLIENT	1000
 #define	MAX_CHANEL	1000
@@ -31,12 +32,15 @@ class Server {
 	private:
 		void new_user_connect();
 		void start_read();
-		void disconnect(User*);
 
 	public:
 		Server(char **argv);
 		void	loop();
+		void 	disconnect(User*);
+		int		parseMessage(User*& usr);
 		
+		std::string getPassword() { return password_; }
+
 		static void	compileMsg(User& sendler, User& recipient, std::string arg1, std::string arg2, std::string arg3);
 		static bool	sendMsg(int socket_fd, const std::string& msg);
 

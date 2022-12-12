@@ -1,6 +1,6 @@
 NAME		=	irc
 
-CC			=	c++ -std=c++17
+CC			=	c++ -std=c++17 -O2
 CFLAGS		=	-Wall -Werror -Wextra
 
 HEADER_DIR	=	./includes
