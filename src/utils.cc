@@ -191,7 +191,7 @@ std::string CompileError(int index, User &usr, std::string arg1, std::string arg
 	return  msg;
 }
 
-std::string compileReply(int index, User &usr, std::vector<std::string>&& args) {
+std::string compileReply(int index, User &usr, std::vector<std::string>& args) {
 	std::string msg = ":IRC_SERVER " + std::to_string(index) + " " + usr.getNick() + " ";
 	switch (index) {
 		case 200:
