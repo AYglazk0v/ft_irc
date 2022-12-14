@@ -136,3 +136,24 @@ void Commands::cmd_ison(std::vector<std::string> args, User *&user, std::vector<
 		Server::sendMsg(user->getSockFd(), msg);
 	}
 }
+
+void Commands::cmd_admin(std::vector<std::string> args, User *&user) {
+	std::string msg;
+	if (args.size() <= 1 || (args.size() != 1 && args[1] == "IRC_SERVER")) {
+		std::vector<std::string> repl_msgs = {" IRC_SERVER"};
+		msg = compileReply(256, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+		repl_msgs[0] = "gtaggana";
+		msg = compileReply(257, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+		repl_msgs[0] = "Andrey";
+		msg = compileReply(258, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+		repl_msgs[0] = "gtaggana@student.21-school.ru";
+		msg = compileReply(259, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+	} else {
+		msg = compileError(402, *user, args[1], "");
+		Server::sendMsg(user->getSockFd(), msg);
+	}
+}
