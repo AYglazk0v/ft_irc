@@ -104,3 +104,13 @@ int Commands::cmd_ping(std::vector<std::string> args, User *&user) {
 	Server::sendMsg(user->getSockFd(), msg);
 	return 1;
 }
+
+int Commands::cmd_pong(std::vector<std::string> args, User *&user) {
+	std::string msg;
+	if (args[1] == "IRC_SERVER") {
+		return 1;
+	}
+	msg = compileError(402, *user, args[1], "");
+	Server::sendMsg(user->getSockFd(), msg);
+	return 0;
+}
