@@ -1,5 +1,8 @@
 #include "../includes/Commands.hpp"
+#include <algorithm>
 #include <fstream>
+#include <string>
+#include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
 	std::string msg;
@@ -113,4 +116,23 @@ int Commands::cmd_pong(std::vector<std::string> args, User *&user) {
 	msg = compileError(402, *user, args[1], "");
 	Server::sendMsg(user->getSockFd(), msg);
 	return 0;
+}
+
+void Commands::cmd_ison(std::vector<std::string> args, User *&user, std::vector<User *> &users) {
+	std::string msg;
+	if (args.size() <= 1) {
+		msg = compileError(461, *user, args[1], "");
+		Server::sendMsg(user->getSockFd(), msg);
+	} else {
+		for (auto&& curr_arg : args) {
+			auto j = std::find_if(users.begin(), users.end(), [&curr_arg](const User& us){ return curr_arg == us.getNick();});
+			if (j != users.end()) {
+				msg += curr_arg + " ";
+			}
+		}
+		msg.pop_back();
+		std::vector<std::string> repl_msgs = {msg};
+		msg = compileReply(303, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+	}
 }
