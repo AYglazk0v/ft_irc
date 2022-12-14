@@ -92,3 +92,15 @@ int Commands::cmd_user(std::vector<std::string> args, User* &user) {
 	}
 	return 1;
 }
+
+int Commands::cmd_ping(std::vector<std::string> args, User *&user) {
+	std::string msg;
+	if (args.size() <= 1) {
+		msg = compileError(409, *user, "", "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return 0;
+	}
+	msg = ":IRC_SERVER PONG :" + args[1] + "\n"; 
+	Server::sendMsg(user->getSockFd(), msg);
+	return 1;
+}
