@@ -1,9 +1,5 @@
 #include "../includes/Commands.hpp"
-#include <algorithm>
-#include <cstddef>
 #include <fstream>
-#include <string>
-#include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
 	std::string msg;
@@ -72,4 +68,27 @@ void Commands::cmd_nick(std::vector<std::string> args, User *&user, std::vector<
 	if (flag_first && user->getAutorization()) {
 		cmd_motd(user);
 	}
+}
+
+int Commands::cmd_user(std::vector<std::string> args, User* &user) {
+	std::string msg;
+	if (args.size() < 4) {
+		msg =compileError(461, *user, args[0], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return 0;
+	}
+	if (user->getAutorization()) {
+		msg = compileError(462, *user, "", "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return 0;
+	}
+	user->setUser(args[1]);
+	user->setHost(args[2]);
+	user->setServerName(args[3]);
+	user->setRealName(args[4]);
+	user->setAutorizatuion(1);
+	if (!user->getNick().empty()) {
+		cmd_motd(user);
+	}
+	return 1;
 }
