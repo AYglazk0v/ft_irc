@@ -175,3 +175,22 @@ void Commands::cmd_info(std::vector<std::string> args, User *&user) {
 		Server::sendMsg(user->getSockFd(), msg);
 	}
 }
+
+void Commands::cmd_away(std::vector<std::string> args, User *&user) {
+	std::string msg;
+	std::vector<std::string> repl_msgs = {};
+	if (args.size() <= 1) {
+		user->setAway(0);
+		msg = compileReply(305, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+	} else {
+		user->setAway(1);
+		for (std::vector<std::string>::iterator it = args.begin(), ite = args.end(); it != ite; ++it) {
+			msg += *it + " ";
+		}
+		msg.pop_back();
+		user->setAwayMsg(msg);
+		msg = compileReply(306, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+	}
+}
