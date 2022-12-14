@@ -157,3 +157,21 @@ void Commands::cmd_admin(std::vector<std::string> args, User *&user) {
 		Server::sendMsg(user->getSockFd(), msg);
 	}
 }
+
+void Commands::cmd_info(std::vector<std::string> args, User *&user) {
+	std::string msg;
+	if (args.size() <= 1 || (args.size() != 1 && args[1] == "IRC_SERVER")) {
+		std::vector<std::string> repl_msgs = {"_______SERVER_INFORMATION________"};
+		msg = compileReply(371, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+		repl_msgs[0] = "_this is the best ir server mayb_";
+		msg = compileReply(371, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+		repl_msgs[0] = "_________________________________";
+		msg = compileReply(371, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+	} else {
+		msg = compileError(402, *user, args[1], "");
+		Server::sendMsg(user->getSockFd(), msg);
+	}
+}
