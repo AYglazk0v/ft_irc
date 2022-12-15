@@ -1,8 +1,6 @@
 #include "../includes/Commands.hpp"
-#include <algorithm>
 #include <fstream>
 #include <string>
-#include <type_traits>
 #include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
@@ -253,6 +251,99 @@ void Commands::cmd_privmsg(std::vector<std::string> args, User *&user, std::vect
 				msg = compileError(401, *user, "", "");
 				Server::sendMsg(user->getSockFd(), msg);
 			}
+		}
+	}
+}
+
+void Commands::cmd_join(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
+	std::string msg;
+	std::vector<std::string> arr_channel;
+	std::vector<std::string> arr_password;
+	if (args.size() <= 1) {
+		compileError(461, *user, args[0], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	arr_channel = split(args[1], ',');
+	if (args.size() > 2) {
+		arr_password = split(args[2], ',');
+	}
+	while (arr_password.size() < arr_channel.size()) {
+		arr_password.push_back("");
+	}
+	for ( auto it = arr_channel.begin(), ite = arr_channel.end(); it != ite; ++it) {
+		if ((*it).front() != '#') {
+			msg = compileError(403, *user, *it, "");
+			Server::sendMsg(user->getSockFd(), msg);
+			continue;
+		}
+		for (auto itt = (*it).begin(), itte = (*it).end(); itt != itte; ++itt) {
+			if ((*itt) <= 32 || (*itt) > 126 || (*itt) == ':' || (*itt) == '!' || (*itt) == ' ' || (*itt) == '@') {
+				msg = compileError(403, *user, *it, "");
+				Server::sendMsg(user->getSockFd(), msg);
+				continue;
+			}
+		}
+		bool new_chanel = 1;
+		for (auto it_chanel = chanels.begin(), ite_chanel = chanels.end(); it_chanel != ite_chanel; ++it_chanel) {
+			if ((*it_chanel)->getName() == (*it)) {
+				new_chanel = 0;
+				if ((*it_chanel)->isBanned(user)) {
+					msg = compileError(474, *user, *it, "");
+					Server::sendMsg(user->getSockFd(), msg);
+					continue;
+				} else if ((*it_chanel)->isMember(user)) {
+					msg = compileError(443, *user, *it, "");
+					Server::sendMsg(user->getSockFd(), msg);
+					continue;
+				} else if ((*it_chanel)->isInvited(user)) {
+					msg = compileError(473, *user, *it, "");
+					Server::sendMsg(user->getSockFd(), msg);
+					continue;
+				} else if ((*it_chanel)->memberSize() >= (*it_chanel)->max_member()) {
+					msg = compileError(471, *user, *it, "");
+					Server::sendMsg(user->getSockFd(), msg);
+					continue;
+				} else if (!(*it_chanel)->getPassword().empty() && (*it_chanel)->getPassword() != arr_password[it - arr_channel.begin()]) {
+					msg = compileError(475, *user, *it, "");
+					Server::sendMsg(user->getSockFd(), msg);
+					continue;
+				}
+				(*it_chanel)->addUser(user);
+				(*it_chanel)->sendAll(user, args[0], *it, "");
+				std::vector<std::string> repl_msgs = {(*it), (*it_chanel)->getTopic()};
+				if (!(*it_chanel)->getTopic().empty()) {
+					msg = compileReply(332, *user, repl_msgs);
+					Server::sendMsg(user->getSockFd(), msg);
+				} else {
+					repl_msgs.pop_back();
+					msg = compileReply(331, *user, repl_msgs);
+					Server::sendMsg(user->getSockFd(), msg);
+				}
+				repl_msgs.clear();
+				repl_msgs.push_back("= " + (*it));
+				repl_msgs.push_back((*it_chanel)->getOperNames() + " " + (*it_chanel)->getUserNames());
+				msg = compileReply(353, *user, repl_msgs);
+				Server::sendMsg(user->getSockFd(), msg);
+				repl_msgs[0] = *it;
+				msg = compileReply(366, *user, repl_msgs);
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+		}
+		if (new_chanel) {
+			Chanel *tmp = new Chanel(user, *it, arr_password[it - arr_password.begin()]);
+			chanels.push_back(tmp);
+			tmp->sendAll(user, args[0], *it, "");
+			std::vector<std::string> repl_msgs = {(*it)};
+			msg = compileReply(331, *user, repl_msgs);
+			Server::sendMsg(user->getSockFd(), msg);
+			repl_msgs[0] = "= " + (*it);
+			repl_msgs.push_back("@" + user->getNick());
+			msg = compileReply(353, *user, repl_msgs);
+			Server::sendMsg(user->getSockFd(), msg);
+			repl_msgs[0] = *it;
+			msg = compileReply(366, *user, repl_msgs);
+			Server::sendMsg(user->getSockFd(), msg);
 		}
 	}
 }

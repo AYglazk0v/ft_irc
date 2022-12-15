@@ -1,5 +1,8 @@
 #include "../includes/Chanel.hpp"
 #include "../includes/Server.hpp"
+#include <algorithm>
+#include <regex>
+#include <string>
 
 void Chanel::addOper(User *oper, User *user) {
 	std::cout << "add Operator: " << std::endl;
@@ -23,4 +26,25 @@ void Chanel::sendAll(User *usr, std::string arg1, std::string arg2, std::string 
 	for (auto&& memb : members_) {
 		Server::compileMsg(*usr, memb, arg1, arg2, arg3);
 	}
+}
+
+std::string Chanel::getOperNames() {
+	std::string ret = {};
+	for (auto&& curr_oper : operators_) {
+		ret += "@";
+		ret += curr_oper.getNick() + " ";
+	}
+	ret.pop_back();
+	return ret;
+}
+
+std::string Chanel::getUserNames() {
+	std::string ret = {};
+	for (auto&& curr_memb : members_) {
+		if (operators_.end() != (std::find_if(operators_.begin(), operators_.end(), [&curr_memb](User& curr_op){ return curr_memb.getNick() == curr_op.getNick();}))) {
+			ret += curr_memb.getNick() + " ";
+		}
+	}
+	ret.pop_back();
+	return ret;
 }
