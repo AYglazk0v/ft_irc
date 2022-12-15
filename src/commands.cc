@@ -2,6 +2,7 @@
 #include <algorithm>
 #include <fstream>
 #include <string>
+#include <type_traits>
 #include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
@@ -192,5 +193,66 @@ void Commands::cmd_away(std::vector<std::string> args, User *&user) {
 		user->setAwayMsg(msg);
 		msg = compileReply(306, *user, repl_msgs);
 		Server::sendMsg(user->getSockFd(), msg);
+	}
+}
+
+void Commands::cmd_privmsg(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels, bool notice) {
+	std::string msg;
+	if (args.size() == 1) {
+		msg = compileError(411, *user, args[0], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	if (args.size() == 2) {
+		msg = compileError(412, *user, "", "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	std::vector<std::string> target = split(args[1], ',');
+	std::vector<std::string> repl_msgs = {};
+	for (auto&& curr_target : target) {
+		if (curr_target.front() != '#' && curr_target.front() != '&') {
+			auto it = std::find_if(users.begin(), users.end(), [&curr_target](User& us){return curr_target == us.getNick();});
+			if (it != users.end()) {
+				msg.clear();
+				for (std::vector<std::string>::iterator it = args.begin() + 2, ite = args.end(); it != ite; ++it) {
+					msg += *it + " ";
+				}
+				msg.pop_back();
+				Server::sendMsg(user->getSockFd(), msg);
+				if ((*it)->getAway() && !notice) {
+					repl_msgs.push_back((*it)->getNick());
+					repl_msgs.push_back((*it)->getAwayMsg());
+					msg = compileReply(301, *user, repl_msgs);
+					Server::sendMsg(user->getSockFd(), msg);
+				}
+			} else {
+				msg = compileError(401, *user, "", "");
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+		} else {
+			bool send = 0;
+			auto it = std::find_if(chanels.begin(), chanels.end(), [&curr_target](Chanel& ch){return  curr_target == ch.getName(); });
+			if (it != chanels.end()) {
+				if ((*it)->isBanned(user) || (*it)->isMember(user)) {
+					msg = compileError(404, *user, "", "");
+					Server::sendMsg(user->getSockFd(), msg);
+					continue;
+				}
+				auto itt = std::find_if(users.begin(), users.end(), [&it, &user](User*& curr_us){return (user->getNick() != curr_us->getNick() && (*it)->isMember(curr_us));});
+				if (itt != users.end()) {
+					msg.clear();
+					for (std::vector<std::string>::iterator it = args.begin() + 2, ite = args.end(); it != ite; ++it) {
+						msg += *it + " ";
+					}
+					Server::compileMsg(*user, *(*itt), args[0], args[1], msg);
+				}
+				send = 1;
+			}
+			else if (!send && it == chanels.end()) {
+				msg = compileError(401, *user, "", "");
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+		}
 	}
 }
