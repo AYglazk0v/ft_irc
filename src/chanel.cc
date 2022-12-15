@@ -48,3 +48,10 @@ std::string Chanel::getUserNames() {
 	ret.pop_back();
 	return ret;
 }
+
+void Chanel::addInvitedUser(User *user) {
+	if (invited_.end() != std::find_if(invited_.begin(), invited_.end(), [&user](User& curr_inv){return user->getNick() == curr_inv.getNick();})) {
+		return;
+	}
+	invited_.push_back(*user);
+}

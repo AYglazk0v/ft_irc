@@ -1,7 +1,5 @@
 #include "../includes/Commands.hpp"
 #include <fstream>
-#include <string>
-#include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
 	std::string msg;
@@ -345,5 +343,55 @@ void Commands::cmd_join(std::vector<std::string> args, User *&user, std::vector<
 			msg = compileReply(366, *user, repl_msgs);
 			Server::sendMsg(user->getSockFd(), msg);
 		}
+	}
+}
+
+void Commands::cmd_invite(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
+	std::string msg;
+	if (args.size() != 3) {
+		msg = compileError(461, *user, args[0], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	User *target = nullptr;
+	auto check_nick = find_if(users.begin(), users.end(), [&args](User& curr_user){return args[1] == curr_user.getNick();});
+	if (check_nick != users.end()) {
+		target = *check_nick;
+	} else {
+		msg = compileError(401, *user, args[1], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	Chanel *target_ch = nullptr;
+	auto check_chanel = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel& curr_ch){return args[2] == curr_ch.getName();});
+	if (check_chanel != chanels.end()) {
+		target_ch = *check_chanel;
+	} else {
+		msg = compileError(442, *user, args[2], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	if (target_ch->isMember(target)) {
+		msg = compileError(443, *user, args[1], args[2]);
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	if (target_ch->getInvOnly() && !target_ch->isOperators(user)) {
+		msg = compileError(482, *user, args[2], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	if (!target->getAway()) {
+		if (target_ch->isInvited(target)) {
+			target_ch->addInvitedUser(target);
+		}
+		std::vector<std::string> repl_msgs = {args[2], args[1]};
+		msg = compileReply(341, *target, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+		Server::compileMsg(*user, *target, args[0] + " " + target->getNick() + " " + args[2], "", "");
+	} else {
+		std::vector<std::string> repl_msgs = {args[1], target->getAwayMsg()};
+		msg = compileReply(301, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
 	}
 }

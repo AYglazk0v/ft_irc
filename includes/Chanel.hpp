@@ -24,6 +24,7 @@ class Chanel {
 		Chanel(User *user, std::string name, std::string password);
 		
 		void addOper(User* oper, User* user);
+		void addInvitedUser(User* user);
 		void sendAll(User* usr, std::string arg1, std::string arg2, std::string arg3);
 		
 		void addUser(User* user)		{ members_.push_back(*user); }
@@ -35,6 +36,8 @@ class Chanel {
 		size_t operSize() const			{ return operators_.size(); }
 		size_t max_member() const		{ return max_member_; }
 		
+		bool getInvOnly() const			{return invOnly_;}
+
 		std::string	getOperNames();
 		std::string getUserNames();
 
