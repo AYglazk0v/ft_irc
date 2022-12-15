@@ -1,5 +1,6 @@
 #include "../includes/Commands.hpp"
 #include <fstream>
+#include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
 	std::string msg;
@@ -392,6 +393,70 @@ void Commands::cmd_invite(std::vector<std::string> args, User *&user, std::vecto
 	} else {
 		std::vector<std::string> repl_msgs = {args[1], target->getAwayMsg()};
 		msg = compileReply(301, *user, repl_msgs);
+		Server::sendMsg(user->getSockFd(), msg);
+	}
+}
+
+std::string Commands::Chanel_who(User *&user, std::vector<Chanel *> &chanels) {
+	std::string msg = {};
+	for (auto it_chanel = chanels.begin(), ite_chanel = chanels.end(); it_chanel != ite_chanel; ++it_chanel) {
+		if ((*it_chanel)->isMember(user)) {
+			if ((*it_chanel)->getInvOnly()) {
+				msg += "Prv,";
+			} else {
+				msg += (*it_chanel)->getName() + " ";
+			}
+		}
+	}
+	if (!msg.empty()) {
+		msg.pop_back();
+	} else {
+		msg = "*no joined channels*";
+	}
+	return msg;
+}
+
+void Commands::cmd_who(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
+	std::string msg;
+	bool oper = 0;
+	if ((args.size() > 2 && args[2] == "o") || (args.size() == 2 && args[1] == "o")) {
+		oper = 1;
+	}
+	if (args.size() > 1 && args[1] != "O") {
+		bool status = 0;
+		for (auto&& curr_ch : chanels) {
+			if (curr_ch->getName() == args[1]) {
+				status = 1;
+				for (auto it = users.begin(), ite = users.end(); it != ite; ++it) {
+					if (curr_ch->isMember(*it)) {
+						msg = Chanel_who(*it, chanels);
+						std::vector<std::string> repl_msgs = {args[1]};
+						msg = compileReply(352, *user, repl_msgs);
+						Server::sendMsg(user->getSockFd(), msg);
+					}
+				}
+			}
+		}
+		if (!status) {
+			msg = compileError(403, *user, args[0], "");
+			Server::sendMsg(user->getSockFd(), msg);
+		} else {
+			std::vector<std::string> repl_msgs = {args[1]};
+			msg = compileReply(315, *user, repl_msgs);
+			Server::sendMsg(user->getSockFd(), msg);
+		}
+	} else {
+		for (auto&& it = users.begin(), ite = users.end(); it != ite; ++it) {
+			if ((!(*it)->getInvis() && (!oper || (oper && (*it)->getOper()))) 
+				|| ((*it)->getInvis() && (*it)->getNick() == user->getNick() && (!oper || (oper && (*it)->getOper())))) {
+				msg = Chanel_who(*it, chanels);
+				std::vector<std::string> repl_msgs = {msg, (*it)->getUsername(), (*it)->getHost(), (*it)->getServerName(), (*it)->getNick(), "H", "", (*it)->getRealName()};
+				msg = compileReply(352, *user, repl_msgs);
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+		}
+		std::vector<std::string> repl_msgs = {};
+		msg = compileReply(315, *user, repl_msgs);
 		Server::sendMsg(user->getSockFd(), msg);
 	}
 }
