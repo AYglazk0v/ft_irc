@@ -1,5 +1,8 @@
 #include "../includes/Commands.hpp"
+#include <algorithm>
 #include <fstream>
+#include <string>
+#include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
 	std::string msg;
@@ -545,6 +548,37 @@ void Commands::cmd_whois(std::vector<std::string> args, User *&user, std::vector
 			}
 			msg = compileReply(318, *user, repl_msgs);
 			Server::sendMsg(user->getSockFd(), msg);
+		}
+	}
+}
+
+void Commands::cmd_topic(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
+	std::string msg;
+	if (args.size() < 2) {
+		msg = compileError(431, *user, args[0], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	auto it = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel& curr_ch){return  args[1] == curr_ch.getName();});
+	if (it != chanels.end()) {
+		if (args.size() == 2) {
+			if (!(*it)->getTopic().empty()) {
+				std::vector<std::string> repl_msgs = {args[1], (*it)->getTopic()};
+				msg = compileReply(332, *user, repl_msgs);
+				Server::sendMsg(user->getSockFd(), msg);
+			} else {
+				std::vector<std::string> repl_msgs = {args[1]};
+				msg = compileReply(331, *user, repl_msgs);
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+		} else {
+			msg = "";
+			for (int i = 2; i < args.size(); ++i) {
+				msg += args[i] + " ";
+			}
+			(*it)->setTopic(msg);
+			std::for_each(users.begin(), users.end(),
+				[&user, &args, &msg](User& curr_user){ Server::compileMsg(*user, curr_user, args[0], args[1], msg);});
 		}
 	}
 }

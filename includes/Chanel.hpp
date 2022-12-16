@@ -4,6 +4,7 @@
 #include "User.hpp"
 #include <algorithm>
 #include <memory>
+#include <string>
 #include <sys/types.h>
 
 class User;
@@ -27,7 +28,9 @@ class Chanel {
 		void addInvitedUser(User* user);
 		void sendAll(User* usr, std::string arg1, std::string arg2, std::string arg3);
 		
-		void addUser(User* user)		{ members_.push_back(*user); }
+		void addUser(User* user)			{ members_.push_back(*user); }
+		void setTopic(std::string topic)	{ topic_ = topic; }
+
 		std::string getName() const		{ return name_; }
 		std::string getPassword() const	{ return password_; }
 		std::string getTopic() const	{ return topic_;}
