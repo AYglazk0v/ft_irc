@@ -4,8 +4,6 @@
 // # include "Server.hpp"
 # include "utils.hpp"
 # include <regex>
-#include <string>
-#include <vector>
 class User {
 	private:
 		int					id_;

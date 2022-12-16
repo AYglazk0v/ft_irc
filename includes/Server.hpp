@@ -5,7 +5,6 @@
 # include "Ping.hpp"
 # include "User.hpp"
 # include "Chanel.hpp"
-#include <string>
 
 #define	MAX_CLIENT	1000
 #define	MAX_CHANEL	1000

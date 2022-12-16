@@ -2,10 +2,6 @@
 # define CHANEL_HPP
 
 #include "User.hpp"
-#include <algorithm>
-#include <memory>
-#include <string>
-#include <sys/types.h>
 
 class User;
 
