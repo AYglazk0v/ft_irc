@@ -579,3 +579,78 @@ void Commands::cmd_topic(std::vector<std::string> args, User *&user, std::vector
 		}
 	}
 }
+
+void Commands::cmd_kick(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
+	std::string msg;
+	if (args.size() < 3) {
+		msg = compileError(461, *user, args[0], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	std::vector<std::string> target_ch = split(args[1],	',');
+	std::vector<std::string> target_user = split(args[2], ',');
+	bool chanel = 0, userb = 0, kick = 0;
+	std::vector<User* > del_user;
+	for (auto&& t_c : target_ch) {
+		auto it_find_ch = std::find_if(chanels.begin(), chanels.end(), [&t_c](Chanel* ch) {return t_c == ch->getName();});
+		if (it_find_ch != chanels.end()) {
+			chanel = 1;
+			for (auto t_u : target_user) {
+				for (auto it = users.begin(), ite = users.end(); it != ite; ++it) {
+					if (t_u != (*it)->getNick()) {
+						userb = 1;
+					}
+					if (t_u == (*it)->getNick() && (*it_find_ch)->isMember(*it)) {
+						userb = 1;
+						kick = 1;
+						if ((*it_find_ch)->isOperators(*it) || !(*it_find_ch)->isOperators(user)) {
+							msg = compileError(482, *user, t_c, "");
+							Server::sendMsg(user->getSockFd(), msg);
+							continue;
+						}
+						del_user.push_back(*it);
+					}
+					if (!userb) {
+						msg = compileError(442, *user, t_c, "");
+						Server::sendMsg(user->getSockFd(), msg);
+					}
+					userb = 0;
+				}
+				if (!kick){
+					msg = compileError(401, *user, t_u, "");
+					Server::sendMsg(user->getSockFd(), msg);
+				}
+				kick = 0;
+			}
+		}
+		if (!chanel) {
+			msg = compileError(403, *user, t_c, "");
+			Server::sendMsg(user->getSockFd(), msg);
+		}
+		chanel = 0;
+	}
+	if (args.size() > 3) {
+		msg = "";
+		for (auto&& curr_arg : args) {
+			msg += curr_arg + " ";
+		}
+	} else {
+		msg = user->getNick();
+	}
+	while (del_user.size()) {
+		for (auto&& curr_ch : chanels) {
+			if (curr_ch->isMember(del_user[0])) {
+				std::vector<User*>::iterator it_u;
+				for (std::vector<User *>::iterator it = del_user.begin(), ite = del_user.end(); it != ite; ++it) {
+					if ((*it)->getNick() == del_user[0]->getNick()) {
+						it_u = it;
+					}
+				}
+				curr_ch->sendAll(user, args[0], curr_ch->getName() + " " + (*it_u)->getNick(), msg);
+				curr_ch->removeMember(del_user[0]);
+				del_user.erase(it_u);
+				break;
+			}
+		}
+	}
+}
