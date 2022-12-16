@@ -505,3 +505,46 @@ void Commands::cmd_part(std::vector<std::string> args, User *&user, std::vector<
 		return;
 	}
 }
+
+void Commands::cmd_whois(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
+	std::string msg;
+	if (args.size() < 2) {
+		msg = compileError(431, *user, "", "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	std::vector<std::string> user_list = split(args[1], ',');
+	for (auto&& curr_user : user_list) {
+		auto it = std::find_if(users.begin(), users.end(), [&curr_user](User& find_user){return curr_user == find_user.getNick();});
+		if (it != users.end()) {
+			std::vector<std::string> repl_msgs = {(*it)->getNick(), (*it)->getUsername(), (*it)->getHost(), (*it)->getRealName()};
+			msg = compileReply(311, *user, repl_msgs);
+			Server::sendMsg(user->getSockFd(), msg);
+			repl_msgs[1] = "AFK MODE";
+			msg = compileReply(317, *user, repl_msgs);
+			Server::sendMsg(user->getSockFd(), msg);
+			if ((*it)->getAway()) {
+				repl_msgs[1] = (*it)->getAwayMsg();
+				msg = compileReply(301, *user, repl_msgs);
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+			if ((*it)->getOper()) {
+				msg = compileReply(313, *user, repl_msgs);
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+			msg = "";
+			for (auto&& curr_ch : chanels) {
+				if (curr_ch->isMember(*it)) {
+					msg += curr_ch->getName() + " ";
+				}
+			}
+			if (!msg.empty()) {
+				msg.pop_back();
+				msg = compileReply(319, *user, repl_msgs);
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+			msg = compileReply(318, *user, repl_msgs);
+			Server::sendMsg(user->getSockFd(), msg);
+		}
+	}
+}
