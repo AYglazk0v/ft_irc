@@ -1,5 +1,10 @@
 #include "../includes/Commands.hpp"
+#include <cstddef>
+#include <cstdio>
+#include <cstdlib>
 #include <fstream>
+#include <iterator>
+#include <string>
 #include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
@@ -458,5 +463,51 @@ void Commands::cmd_who(std::vector<std::string> args, User *&user, std::vector<U
 		std::vector<std::string> repl_msgs = {};
 		msg = compileReply(315, *user, repl_msgs);
 		Server::sendMsg(user->getSockFd(), msg);
+	}
+}
+
+void Commands::cmd_part(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
+	std::string msg;
+	if (args.size() < 2) {
+		msg = compileError(461, *user, args[0], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	bool exit = 0;
+	for (auto&& curr_ch : chanels) {
+		if (curr_ch->getName() == args[1]) {
+			if (curr_ch->isMember(user)) {
+				if (curr_ch->isOperators(user) && curr_ch->memberSize() > 1 && curr_ch->operSize() == 1) {
+					curr_ch->addOper(user, nullptr);
+				} else if (curr_ch->memberSize() == 1) {
+					chanels.erase(std::remove(chanels.begin(), chanels.end() ,curr_ch));
+					break;
+				}
+				curr_ch->removeOperator(user);
+				curr_ch->removeMember(user);
+				curr_ch->sendAll(user, "QUIT", "Client exit", "");
+				exit = 1;
+				for (auto&& curr_user : users) {
+					if (curr_ch->isMember(curr_user)) {
+						msg = Chanel_who(user, chanels);
+						std::vector<std::string> repl_msgs = {"= " + args[1], curr_ch->getOperNames() + " " + curr_ch->getUserNames()};
+						msg = compileReply(353, *curr_user, repl_msgs);
+						Server::sendMsg(curr_user->getSockFd(), msg);
+						repl_msgs[0] = args[1];
+						msg = compileReply(366, *curr_user, repl_msgs);
+						Server::sendMsg(curr_user->getSockFd(), msg);
+					}
+				}
+				break;
+			} else {
+				msg = compileError(442, *user, args[1], "");
+				Server::sendMsg(user->getSockFd(), msg);
+			}
+		}
+	}
+	if (!exit) {
+		msg = compileError(403, *user, args[1], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
 	}
 }
