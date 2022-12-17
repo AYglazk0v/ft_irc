@@ -1,10 +1,6 @@
 #include "../includes/Commands.hpp"
-#include <algorithm>
-#include <array>
 #include <bitset>
 #include <fstream>
-#include <string>
-#include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
 	std::string msg;
