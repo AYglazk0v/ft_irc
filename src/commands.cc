@@ -1,5 +1,10 @@
 #include "../includes/Commands.hpp"
+#include <algorithm>
+#include <array>
+#include <bitset>
 #include <fstream>
+#include <string>
+#include <vector>
 
 int Commands::cmd_pass(std::vector<std::string> args, User* &user, Server *data) {
 	std::string msg;
@@ -652,5 +657,102 @@ void Commands::cmd_kick(std::vector<std::string> args, User *&user, std::vector<
 				break;
 			}
 		}
+	}
+}
+
+void Commands::cmd_mode(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
+	std::string msg;
+	if (args.size() < 3) {
+		msg = compileError(461, *user, args[0] , "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	if (args[2][0] != '+' && args[2][0] != '-') {
+		msg = compileError(472, *user, args[2] , "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	std::string flags_c = "opsitnmlbvk";
+	std::string flags_u = "iswo";
+	if (args[2].size() > 2 && (args[2].find_first_of("olv") != std::string::npos)) {
+		msg = compileError(472, *user, args[2], "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
+	}
+	std::bitset<255> flags = {};
+	for (int i = 1; i < args[2].length(); ++i) {
+		if ((args[1][0] == '#' && flags_c.find(args[2][i]) != std::string::npos) || (args[1][0] != '#' && flags_u.find(args[2][i]) != std::string::npos)) {
+			if (flags[args[2][i]] == 1) {
+				msg = compileError(501, *user, args[2], "");
+				Server::sendMsg(user->getSockFd(), msg);
+				return;
+			}
+			flags[args[2][i]] = 1;
+		}
+	}
+	if (args[1][0] == '#') {
+		if (args.size() < 4) {
+			msg = compileError(461, *user, args[0], "");
+			Server::sendMsg(user->getSockFd(), msg);
+			return;
+		}
+		auto target_user = std::find_if(users.begin(), users.end(), [&args](User& curr_user){return curr_user.getNick() == args[3];});
+		if (args[3].find("*!") != std::string::npos) {
+			target_user = std::find_if(users.begin(), users.end(), [&args](User& curr_user){return args[3].find(curr_user.getUsername()) != std::string::npos;});
+		}
+		auto target_ch = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel& curr_ch){return  args[1] == curr_ch.getUserNames();});
+		if (target_ch != chanels.end() && target_user != users.end()) {
+			if (!(*target_ch)->isOperators(user)) {
+				msg = compileError(482, *user, args[1], "");
+				Server::sendMsg(user->getSockFd(), msg);
+				return;
+			}
+			for (auto&& c : args[2]){
+				if (c == 'o' && args[2][0] == '+') {
+					(*target_ch)->addOper(user, *target_user);
+				} else if (c == 'o' && args[2][0] == '-') {
+					if ((*target_ch)->memberSize() == 1) {
+						return;
+					}
+					(*target_ch)->removeOperator(*target_user);
+					if ((*target_ch)->operSize() == 0) {
+						(*target_ch)->addOper(user, nullptr);
+					}
+					(*target_ch)->sendAll(user, "MODE " + args[1] + " -o " + (*target_user)->getNick(), "", "");
+				} else if (c == 'v' && args[2][0] == '+') {
+					(*target_ch)->sendAll(user, "MODE " + args[1] + " +v " + (*target_user)->getNick(), "", "");
+				} else if (c == 'v' && args[2][0] == '-') {
+					(*target_ch)->sendAll(user, "MODE " + args[1] + " -v " + (*target_user)->getNick(), "", "");
+				} else if (c == 'b' && args[2][0] == '+') {
+					(*target_ch)->sendAll(user, "MODE " + args[1] + " +b " + (*target_user)->getNick(), "", "");
+					(*target_ch)->addBan(*target_user);
+				} else if (c == 'b' && args[2][0] == '-') {
+					(*target_ch)->sendAll(user, "MODE " + args[1] + " -b " + (*target_user)->getNick(), "", "");
+					(*target_ch)->removeBan(*target_user);
+				}
+			} 
+		} else {
+			msg = compileError(403, *user, args[1], "");
+			Server::sendMsg(user->getSockFd(), msg);
+			return;
+		}
+	} else if (user->getNick() == args[1]) {
+		for (int i = 1; i < args[2].length(); ++i) {
+			if (args[2][i] == 'i' && args[2][0] == '+') {
+				user->setInvis(1);
+			} else if (args[2][i] == 'i' && args[2][0] == '-') {
+				user->setInvis(0);
+			} else if (args[2][i] == 's' && args[2][0] == '+') {
+				user->setInvis(1);
+			} else if (args[2][i] == 'w' && args[2][0] == '+') {
+				user->setInvis(1);
+			} else if (args[2][i] == 'o' && args[2][0] == '+') {
+				user->setInvis(1);
+			}
+		}
+	} else {
+		msg = compileError(502, *user, "", "");
+		Server::sendMsg(user->getSockFd(), msg);
+		return;
 	}
 }

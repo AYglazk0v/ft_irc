@@ -25,6 +25,7 @@ class Chanel {
 		void sendAll(User* usr, std::string arg1, std::string arg2, std::string arg3);
 		
 		void addUser(User* user)			{ members_.push_back(*user); }
+		void addBan(User* user)				{ banned_.push_back(*user); }
 		void setTopic(std::string topic)	{ topic_ = topic; }
 
 		std::string getName() const		{ return name_; }
@@ -48,6 +49,7 @@ class Chanel {
 
 		void removeMember(User *usr)		{ members_.erase(std::remove_if(members_.begin(), members_.end(), [&usr](User& curr){return usr->getId() == curr.getId(); }));}
 		void removeOperator(User *usr)		{ operators_.erase(std::remove_if(operators_.begin(), operators_.end(), [&usr](User *curr){ return curr->getId() == usr->getId(); }));}
+		void removeBan(User *usr)			{ operators_.erase(std::remove_if(banned_.begin(), banned_.end(), [&usr](User *curr){ return curr->getId() == usr->getId(); }));}
 
 }; //Chanel
 
