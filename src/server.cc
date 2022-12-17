@@ -150,10 +150,54 @@ int Server::parseMessage(User*& usr) {
 			return 1;
 		} else if (args[0] == "PASS" && Commands::cmd_pass(args, usr, this)) {
 			return 1;
+		} else if (args[0] == "USER" && Commands::cmd_user(args, usr) && req_res[(*usr).getId()].delay == -1) {
+			start_timer(usr);
+		} else if (args[0] == "NICK"){
+			Commands::cmd_nick(args, usr, users_);
+		} else if ((args[0] == "PING" && Commands::cmd_ping(args, usr)) || (args[0] == "PONG" && Commands::cmd_pong(args, usr))) {
+			if (!req_res[usr->getId()].res_wait) {
+				req_res[usr->getId()].res_req = 1;
+			} else {
+				req_res[usr->getId()].res_res = 1;
+				start_timer(usr);
+			}
+		} else if (args[0] == "ADMIN") {
+			Commands::cmd_admin(args, usr);
+		} else if (!usr->getAutorization() && args[0] != "PASS") {
+			std::string msg = compileError(451, *usr, args[0], "");
+			Server::sendMsg(usr->getSockFd(), msg);
+		} else if (args[0] == "AWAY") {
+			Commands::cmd_away(args, usr);
+		} else if (args[0] == "ISON") {
+			Commands::cmd_ison(args, usr, users_);
+		} else if (args[0] == "PRIVMSG") {
+			Commands::cmd_privmsg(args, usr, users_, chanels, 0);
+		} else if (args[0] == "NOTICE") {
+			Commands::cmd_privmsg(args, usr, users_, chanels, 1);
+		} else if (args[0] == "INFO") {
+			Commands::cmd_info(args, usr);
+		} else if (args[0] == "JOIN") {
+			Commands::cmd_info(args, usr);
+		} else if (args[0] == "INVITE") {
+			Commands::cmd_invite(args, usr, users_, chanels);
+		} else if (args[0] == "WHO") {
+			Commands::cmd_who(args, usr, users_, chanels);
+		} else if (args[0] == "WHOIS") {
+			Commands::cmd_whois(args, usr, users_, chanels);
+		} else if (args[0] == "PART") {
+			Commands::cmd_part(args, usr, users_, chanels);
+		} else if (args[0] == "TOPIC") {
+			Commands::cmd_topic(args, usr, users_, chanels);
+		} else if (args[0] == "KICK") {
+			Commands::cmd_kick(args, usr, users_, chanels);
+		} else if (args[0] == "MODE") {
+			Commands::cmd_mode(args, usr, users_, chanels);
+		} else if (args[0] != "PASS") {
+			std::string msg = compileError(421, *usr, args[0], "");
+			Server::sendMsg(usr->getSockFd(), msg);
 		}
-		//TODO
-
 	}
+	usr->clearBuff();
 	return 0;
 }
 
@@ -199,4 +243,11 @@ bool Server::sendMsg(int sock_fd, const std::string& msg) {
 	}
 	std::cerr << "Error occurred while writing to socket" << std::endl;
 	return false;
+}
+
+void Server::start_timer(User*& urs) {
+	pthread_t timer_th;
+	req_res[(*urs).getId()].delay  =time(0);
+	pthread_create(&timer_th, nullptr, &ping_request, &req_res[(*urs).getId()]);
+	pthread_detach(timer_th);
 }

@@ -43,6 +43,8 @@ class Server {
 		static void	compileMsg(User& sendler, User& recipient, std::string arg1, std::string arg2, std::string arg3);
 		static bool	sendMsg(int socket_fd, const std::string& msg);
 
+		void start_timer(User*& usr);
+
 }; //server
 
 #endif

@@ -1,7 +1,6 @@
 #ifndef UTILS_HPP
 # define UTILS_HPP
 
-// #include "User.hpp"
 # include <iostream>
 # include <cstring>
 # include <algorithm>
@@ -16,4 +15,6 @@
 void        error(const std::string& msg);
 std::vector<std::string> split(std::string msg, char sym);
 std::vector<std::string> splitMessage(std::string msg);
+void		*ping_request(void *req_res);
+
 #endif

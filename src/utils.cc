@@ -1,9 +1,45 @@
 #include "../includes/utils.hpp"
-#include "..//includes/User.hpp"
+#include "../includes/User.hpp"
+#include "../includes/Server.hpp"
+#include "../includes/Ping.hpp"
 
 void error(const std::string& msg) {
 		std::cerr << msg << std::endl;
 		exit(EXIT_FAILURE);
+}
+
+void *ping_request(void *req_res) {
+	Ping *ping = (Ping *)req_res;
+	ping->res_res = 0;
+	while (time(0) - ping->delay < 100) {
+		if (!ping->online) {
+			return nullptr;
+		}
+		if (ping->res_req) {
+			ping->res_req = 0;
+			ping->delay = time(0);
+		}
+	}
+	pthread_mutex_lock(&ping->mutex);
+	std::string msg = ":IRC_SERVER PING : IRC_SERVER\n";
+	if (!Server::sendMsg(ping->client_sock_fd, msg)) {
+		return nullptr;
+	}
+	pthread_mutex_unlock(&ping->mutex);
+	ping->res_wait = 1;
+	std::time_t res_time = time(0);
+	while (time(0) - res_time < 200) {
+		if (!ping->online){
+			return nullptr;
+		}
+	}
+	if (!ping->res_res) {
+		pthread_mutex_lock(&ping->mutex);
+		ping->disconnect = 1;
+		pthread_mutex_unlock(&ping->mutex);
+	}
+	ping->res_wait = 0;
+	return nullptr;
 }
 
 std::vector<std::string> split(std::string msg, char sym) {
