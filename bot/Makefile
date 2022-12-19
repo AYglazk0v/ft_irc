@@ -1,6 +1,6 @@
 NAME		=	Bot
 
-CC			=	c++ -std=c++17 -O2 -g
+CC			=	c++ -std=c++17 -O2
 CFLAGS		=	-Wall -Werror -Wextra
 
 HEADER_DIR	=	./includes
