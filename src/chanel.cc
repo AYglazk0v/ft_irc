@@ -17,7 +17,6 @@ void Chanel::addOper(User *oper, User *user) {
 	if (user == NULL) {
 		for (auto&& memb : members_) {
 			if (oper->getId() != memb.getId()) {
-			// if (operators_[0].getId() != memb.getId()) { Bug???
 				user = &memb;
 				break;
 			}
