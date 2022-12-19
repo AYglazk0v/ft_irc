@@ -56,7 +56,7 @@ void Commands::cmd_nick(std::vector<std::string> args, User *&user, std::vector<
 		Server::sendMsg(user->getSockFd(), msg);
 		return;
 	}
-	if (std::any_of(args[1].begin(), args[2].end(),[](const char c){return c <= 32 || c > 126 || c == ' ' || c == ':' || c == '#' || c == '!' || c == '@';})) {
+	if (std::any_of(args[1].begin(), args[1].end(),[](const char c){return c <= 32 || c > 126 || c == ' ' || c == ':' || c == '#' || c == '!' || c == '@';})) {
 		msg = compileError(432, *user, args[1], "");
 		Server::sendMsg(user->getSockFd(), msg);
 		return;
@@ -117,7 +117,7 @@ int Commands::cmd_pong(std::vector<std::string> args, User *&user) {
 }
 
 void Commands::cmd_ison(std::vector<std::string> args, User *&user, std::vector<User *> &users) {
-	std::string msg;
+	std::string msg = "";
 	if (args.size() <= 1) {
 		msg = compileError(461, *user, args[1], "");
 		Server::sendMsg(user->getSockFd(), msg);
@@ -128,7 +128,9 @@ void Commands::cmd_ison(std::vector<std::string> args, User *&user, std::vector<
 				msg += curr_arg + " ";
 			}
 		}
-		msg.pop_back();
+		if (!msg.empty()) {
+			msg.pop_back();
+		}
 		std::vector<std::string> repl_msgs = {msg};
 		msg = compileReply(303, *user, repl_msgs);
 		Server::sendMsg(user->getSockFd(), msg);
@@ -186,7 +188,9 @@ void Commands::cmd_away(std::vector<std::string> args, User *&user) {
 		for (std::vector<std::string>::iterator it = args.begin(), ite = args.end(); it != ite; ++it) {
 			msg += *it + " ";
 		}
-		msg.pop_back();
+		if (!msg.empty()) {
+			msg.pop_back();
+		}
 		user->setAwayMsg(msg);
 		msg = compileReply(306, *user, repl_msgs);
 		Server::sendMsg(user->getSockFd(), msg);
@@ -212,11 +216,15 @@ void Commands::cmd_privmsg(std::vector<std::string> args, User *&user, std::vect
 			auto it = std::find_if(users.begin(), users.end(), [&curr_target](User*& us){return curr_target == us->getNick();});
 			if (it != users.end()) {
 				msg.clear();
-				for (std::vector<std::string>::iterator it = args.begin() + 2, ite = args.end(); it != ite; ++it) {
-					msg += *it + " ";
+				msg += ":" + user->getNick() + " PRIVMSG " + (*it)->getNick() + ": ";
+				for (std::vector<std::string>::iterator itt = args.begin() + 2, itte = args.end(); itt != itte; ++itt) {
+					msg += *itt + " ";
 				}
-				msg.pop_back();
-				Server::sendMsg(user->getSockFd(), msg);
+				if (!msg.empty()) {
+					msg.pop_back();
+					msg += "\r\n";
+				}
+				Server::sendMsg((*it)->getSockFd(), msg);
 				if ((*it)->getAway() && !notice) {
 					repl_msgs.push_back((*it)->getNick());
 					repl_msgs.push_back((*it)->getAwayMsg());
@@ -315,7 +323,9 @@ void Commands::cmd_join(std::vector<std::string> args, User *&user, std::vector<
 					msg = compileReply(332, *user, repl_msgs);
 					Server::sendMsg(user->getSockFd(), msg);
 				} else {
-					repl_msgs.pop_back();
+					if (!repl_msgs.empty()) {
+						repl_msgs.pop_back();
+					}
 					msg = compileReply(331, *user, repl_msgs);
 					Server::sendMsg(user->getSockFd(), msg);
 				}
@@ -419,6 +429,9 @@ std::string Commands::Chanel_who(User *&user, std::vector<Chanel *> &chanels) {
 void Commands::cmd_who(std::vector<std::string> args, User *&user, std::vector<User *> &users, std::vector<Chanel *> &chanels) {
 	std::string msg;
 	bool oper = 0;
+	if (args.size() <= 1) {
+		return;
+	}
 	if ((args.size() > 2 && args[2] == "o") || (args.size() == 2 && args[1] == "o")) {
 		oper = 1;
 	}

@@ -30,7 +30,7 @@
 #define IRC_RNAME "Weather"
 #define IRC_NICK "ircbot"
 
-class Socket {
+class Socket{
 	private:
 		int				fd_;
 		std::string		host_;

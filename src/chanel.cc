@@ -41,7 +41,9 @@ std::string Chanel::getOperNames() {
 		ret += "@";
 		ret += curr_oper.getNick() + " ";
 	}
-	ret.pop_back();
+	if (!ret.empty()) {
+		ret.pop_back();
+	}
 	return ret;
 }
 
@@ -52,7 +54,9 @@ std::string Chanel::getUserNames() {
 			ret += curr_memb.getNick() + " ";
 		}
 	}
-	ret.pop_back();
+	if (!ret.empty()) {
+		ret.pop_back();
+	}
 	return ret;
 }
 
