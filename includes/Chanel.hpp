@@ -48,8 +48,8 @@ class Chanel {
 		bool isBanned(User *usr) const		{ return (banned_.end() != std::find_if(banned_.begin(), members_.end(), [&usr](const User& curr_cmp) { return usr->getId() == curr_cmp.getId(); })); }
 
 		void removeMember(User *usr)		{ members_.erase(std::remove_if(members_.begin(), members_.end(), [&usr](User& curr){return usr->getId() == curr.getId(); }));}
-		void removeOperator(User *usr)		{ operators_.erase(std::remove_if(operators_.begin(), operators_.end(), [&usr](User *curr){ return curr->getId() == usr->getId(); }));}
-		void removeBan(User *usr)			{ operators_.erase(std::remove_if(banned_.begin(), banned_.end(), [&usr](User *curr){ return curr->getId() == usr->getId(); }));}
+		void removeOperator(User *usr)		{ operators_.erase(std::remove_if(operators_.begin(), operators_.end(), [&usr](User& curr){ return curr.getId() == usr->getId(); }));}
+		void removeBan(User *usr)			{ banned_.erase(std::remove_if(banned_.begin(), banned_.end(), [&usr](User& curr){ return curr.getId() == usr->getId(); }));}
 
 }; //Chanel
 

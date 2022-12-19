@@ -51,7 +51,7 @@ void Commands::cmd_nick(std::vector<std::string> args, User *&user, std::vector<
 		Server::sendMsg(user->getSockFd(), msg);
 		return;
 	}
-	if (std::any_of(users.begin(), users.end(), [&args](const User& us){return us.getNick() == args[1];})) {
+	if (std::any_of(users.begin(), users.end(), [&args](User*& us){return us->getNick() == args[1];})) {
 		msg = compileError(433, *user, args[1], "");
 		Server::sendMsg(user->getSockFd(), msg);
 		return;
@@ -123,7 +123,7 @@ void Commands::cmd_ison(std::vector<std::string> args, User *&user, std::vector<
 		Server::sendMsg(user->getSockFd(), msg);
 	} else {
 		for (auto&& curr_arg : args) {
-			auto j = std::find_if(users.begin(), users.end(), [&curr_arg](const User& us){ return curr_arg == us.getNick();});
+			auto j = std::find_if(users.begin(), users.end(), [&curr_arg](User*& us){ return curr_arg == us->getNick();});
 			if (j != users.end()) {
 				msg += curr_arg + " ";
 			}
@@ -209,7 +209,7 @@ void Commands::cmd_privmsg(std::vector<std::string> args, User *&user, std::vect
 	std::vector<std::string> repl_msgs = {};
 	for (auto&& curr_target : target) {
 		if (curr_target.front() != '#' && curr_target.front() != '&') {
-			auto it = std::find_if(users.begin(), users.end(), [&curr_target](User& us){return curr_target == us.getNick();});
+			auto it = std::find_if(users.begin(), users.end(), [&curr_target](User*& us){return curr_target == us->getNick();});
 			if (it != users.end()) {
 				msg.clear();
 				for (std::vector<std::string>::iterator it = args.begin() + 2, ite = args.end(); it != ite; ++it) {
@@ -229,7 +229,7 @@ void Commands::cmd_privmsg(std::vector<std::string> args, User *&user, std::vect
 			}
 		} else {
 			bool send = 0;
-			auto it = std::find_if(chanels.begin(), chanels.end(), [&curr_target](Chanel& ch){return  curr_target == ch.getName(); });
+			auto it = std::find_if(chanels.begin(), chanels.end(), [&curr_target](Chanel*& ch){return  curr_target == ch->getName(); });
 			if (it != chanels.end()) {
 				if ((*it)->isBanned(user) || (*it)->isMember(user)) {
 					msg = compileError(404, *user, "", "");
@@ -355,7 +355,7 @@ void Commands::cmd_invite(std::vector<std::string> args, User *&user, std::vecto
 		return;
 	}
 	User *target = nullptr;
-	auto check_nick = find_if(users.begin(), users.end(), [&args](User& curr_user){return args[1] == curr_user.getNick();});
+	auto check_nick = find_if(users.begin(), users.end(), [&args](User*& curr_user){return args[1] == curr_user->getNick();});
 	if (check_nick != users.end()) {
 		target = *check_nick;
 	} else {
@@ -364,7 +364,7 @@ void Commands::cmd_invite(std::vector<std::string> args, User *&user, std::vecto
 		return;
 	}
 	Chanel *target_ch = nullptr;
-	auto check_chanel = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel& curr_ch){return args[2] == curr_ch.getName();});
+	auto check_chanel = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel*& curr_ch){return args[2] == curr_ch->getName();});
 	if (check_chanel != chanels.end()) {
 		target_ch = *check_chanel;
 	} else {
@@ -516,7 +516,7 @@ void Commands::cmd_whois(std::vector<std::string> args, User *&user, std::vector
 	}
 	std::vector<std::string> user_list = split(args[1], ',');
 	for (auto&& curr_user : user_list) {
-		auto it = std::find_if(users.begin(), users.end(), [&curr_user](User& find_user){return curr_user == find_user.getNick();});
+		auto it = std::find_if(users.begin(), users.end(), [&curr_user](User*& find_user){return curr_user == find_user->getNick();});
 		if (it != users.end()) {
 			std::vector<std::string> repl_msgs = {(*it)->getNick(), (*it)->getUsername(), (*it)->getHost(), (*it)->getRealName()};
 			msg = compileReply(311, *user, repl_msgs);
@@ -557,7 +557,7 @@ void Commands::cmd_topic(std::vector<std::string> args, User *&user, std::vector
 		Server::sendMsg(user->getSockFd(), msg);
 		return;
 	}
-	auto it = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel& curr_ch){return  args[1] == curr_ch.getName();});
+	auto it = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel*& curr_ch){return  args[1] == curr_ch->getName();});
 	if (it != chanels.end()) {
 		if (args.size() == 2) {
 			if (!(*it)->getTopic().empty()) {
@@ -576,7 +576,7 @@ void Commands::cmd_topic(std::vector<std::string> args, User *&user, std::vector
 			}
 			(*it)->setTopic(msg);
 			std::for_each(users.begin(), users.end(),
-				[&user, &args, &msg](User& curr_user){ Server::compileMsg(*user, curr_user, args[0], args[1], msg);});
+				[&user, &args, &msg](User*& curr_user){ Server::compileMsg(*user, *curr_user, args[0], args[1], msg);});
 		}
 	}
 }
@@ -692,11 +692,11 @@ void Commands::cmd_mode(std::vector<std::string> args, User *&user, std::vector<
 			Server::sendMsg(user->getSockFd(), msg);
 			return;
 		}
-		auto target_user = std::find_if(users.begin(), users.end(), [&args](User& curr_user){return curr_user.getNick() == args[3];});
+		auto target_user = std::find_if(users.begin(), users.end(), [&args](User*& curr_user){return curr_user->getNick() == args[3];});
 		if (args[3].find("*!") != std::string::npos) {
-			target_user = std::find_if(users.begin(), users.end(), [&args](User& curr_user){return args[3].find(curr_user.getUsername()) != std::string::npos;});
+			target_user = std::find_if(users.begin(), users.end(), [&args](User*& curr_user){return args[3].find(curr_user->getUsername()) != std::string::npos;});
 		}
-		auto target_ch = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel& curr_ch){return  args[1] == curr_ch.getUserNames();});
+		auto target_ch = std::find_if(chanels.begin(), chanels.end(), [&args](Chanel*& curr_ch){return  args[1] == curr_ch->getUserNames();});
 		if (target_ch != chanels.end() && target_user != users.end()) {
 			if (!(*target_ch)->isOperators(user)) {
 				msg = compileError(482, *user, args[1], "");

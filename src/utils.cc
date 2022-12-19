@@ -84,7 +84,7 @@ std::vector<std::string> splitMessage(std::string msg) {
 	return ret;
 }
 
-std::string CompileError(int index, User &usr, std::string arg1, std::string arg2) {
+std::string compileError(int index, User &usr, std::string arg1, std::string arg2) {
 	std::string msg = ":IRC_SERVER " + std::to_string(index) + " " + usr.getNick() + " ";
 	switch (index)
 	{

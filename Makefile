@@ -8,12 +8,15 @@ SRC_DIR		=	./src
 OBJ_DIR		=	./obj
 
 HEADER		=	Chanel.hpp \
+				Commands.hpp \
 				Ping.hpp \
 				Server.hpp \
 				User.hpp \
 				utils.hpp
 
-SRC			=	irc.cc \
+SRC			=	chanel.cc \
+				commands.cc \
+				irc.cc \
 				server.cc \
 				utils.cc
 

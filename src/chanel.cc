@@ -3,6 +3,15 @@
 #include <algorithm>
 #include <regex>
 
+Chanel::Chanel(User *user, std::string name, std::string password) {
+	name_ = name;
+	password_ = password;
+	max_member_ = 100;
+	invOnly_ = 0;
+	members_.push_back(*user);
+	operators_.push_back(*user);
+}
+
 void Chanel::addOper(User *oper, User *user) {
 	std::cout << "add Operator: " << std::endl;
 	if (user == NULL) {
